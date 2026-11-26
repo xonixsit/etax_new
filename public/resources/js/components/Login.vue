@@ -47,14 +47,14 @@
                             </div>
                         </div>
 
-                        <!-- reCAPTCHA -->
+                        <!-- reCAPTCHA
                         <div class="col-lg-12 mb-4">
                             <div class="g-recaptcha" data-sitekey="6LcvjgYeAAAAADUxnyea4-5uwai5av9tow6TfIrE"></div>
 
                             <span v-if="errors.has('g-recaptcha-response')" class="small text-danger w-100">{{
                                     errors.first('g-recaptcha-response')
                                 }}</span>
-                        </div>
+                        </div> -->
 
 
                         <!-- Submit Button -->

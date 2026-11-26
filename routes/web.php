@@ -23,7 +23,7 @@ Route::get('invoice/payment/thank-you', [InvoiceController::class, 'customerInvo
 
 Route::resource('referrals', ReferralController::class)->only(['create', 'store']);
 
-Auth::routes(['verify' => true]);
+Auth::routes(['verify' => false]);
 
 //Common Routes
 Route::group(['middleware' => 'auth'], function () {
@@ -42,10 +42,10 @@ Route::get("service/{slug}", [HomeController::class, 'service_page'])->name('ser
 
 
 Route::get('/artisanCmdRun/clear', function () {
-    // delete storage folder in public/storage
     \Artisan::call('cache:clear');
     \Artisan::call('view:clear');
     \Artisan::call('config:clear');
+    \Artisan::call('route:clear');
     echo 'Done';
 });
 Route::get('/artisan/storage/link', function () {

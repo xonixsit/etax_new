@@ -6123,7 +6123,7 @@ window.axios.defaults.headers.common = {
   'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
   'Accept': 'application/json'
 };
-window.axios.defaults.baseURL = window.location.origin;
+window.axios.defaults.baseURL = "https://www.etaxplanner.com";
 window.Year = document.querySelector('meta[name="year"]').getAttribute('content');
 window.google_site_key = document.querySelector('meta[name="google-site-verification"]').getAttribute('content');
 
@@ -25797,21 +25797,21 @@ var render = function () {
                   : _vm._e(),
               ]),
             ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-lg-12 mb-4" }, [
-              _c("div", { staticClass: "col-lg-12 mb-4" }, [
-                _c("div", {
-                  staticClass: "g-recaptcha",
-                  attrs: { "data-sitekey": _vm.google_site_key },
-                }),
-                _vm._v(" "),
-                _vm.errors.has("g-recaptcha")
-                  ? _c("span", { staticClass: "small text-danger w-100" }, [
-                      _vm._v(_vm._s(_vm.errors.first("g-recaptcha"))),
-                    ])
-                  : _vm._e(),
-              ]),
-            ]),
+            // _vm._v(" "),
+            // _c("div", { staticClass: "col-lg-12 mb-4" }, [
+            //   _c("div", { staticClass: "col-lg-12 mb-4" }, [
+            //     _c("div", {
+            //       staticClass: "g-recaptcha",
+            //       attrs: { "data-sitekey": _vm.google_site_key },
+            //     }),
+            //     _vm._v(" "),
+            //     _vm.errors.has("g-recaptcha")
+            //       ? _c("span", { staticClass: "small text-danger w-100" }, [
+            //           _vm._v(_vm._s(_vm.errors.first("g-recaptcha"))),
+            //         ])
+            //       : _vm._e(),
+            //   ]),
+            // ]),
             _vm._v(" "),
             _c("div", { staticClass: "form-group col-lg-12 mx-auto mb-0" }, [
               _c(

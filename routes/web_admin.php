@@ -63,6 +63,8 @@ Route::group(['middleware' => ['auth', AdminMiddleware::class], 'prefix' => 'adm
 
     Route::get('download-tax-document/{user}', [TaxDocumentController::class, 'download_tax_document'])->name('download_tax_document');
     Route::post('download-tax-document/{user}/{year}', [TaxDocumentController::class, 'download_tax_document_store'])->name('download_tax_document_store');
+    Route::post('download-tax-document-chunk', [TaxDocumentController::class, 'download_tax_document_chunk'])->name('download_tax_document_chunk');
+    Route::post('download-tax-document-finalize', [TaxDocumentController::class, 'download_tax_document_finalize'])->name('download_tax_document_finalize');
     Route::delete('download-tax-document/{id}', [TaxDocumentController::class, 'download_tax_document_delete'])->name('download_tax_document_delete');
     Route::post('download-tax-document/{id}/download', [TaxDocumentController::class, 'download_tax_document_download'])->name('download_tax_document_download');
 

@@ -87,70 +87,6 @@
                                     </div>
                                 </div>
                             </form>
-
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    const uploadFileInput = document.getElementById('uploadFile');
-                                    
-                                    if (!uploadFileInput) {
-                                        console.error('Upload file input not found');
-                                        return;
-                                    }
-
-                                    uploadFileInput.addEventListener('change', function(e) {
-                                        const file = e.target.files[0];
-                                        if (!file) return;
-
-                                        const formData = new FormData();
-                                        formData.append('file', file);
-                                        
-                                        const tokenInput = document.querySelector('input[name="_token"]');
-                                        if (tokenInput) {
-                                            formData.append('_token', tokenInput.value);
-                                        }
-
-                                        const xhr = new XMLHttpRequest();
-                                        
-                                        xhr.upload.addEventListener('progress', function(e) {
-                                            if (e.lengthComputable) {
-                                                const percentComplete = Math.round((e.loaded / e.total) * 100);
-                                                document.getElementById('progressPercent').textContent = percentComplete;
-                                                document.getElementById('progressText').textContent = percentComplete;
-                                                document.querySelector('#uploadProgress .progress-bar').style.width = percentComplete + '%';
-                                            }
-                                        });
-
-                                        xhr.addEventListener('load', function() {
-                                            if (xhr.status === 200 || xhr.status === 302 || xhr.status === 201) {
-                                                setTimeout(() => window.location.reload(), 1000);
-                                            } else {
-                                                alert('Upload failed: ' + xhr.status);
-                                                resetUpload();
-                                            }
-                                        });
-
-                                        xhr.addEventListener('error', function() {
-                                            alert('Upload error');
-                                            resetUpload();
-                                        });
-
-                                        function resetUpload() {
-                                            document.getElementById('uploadFile').value = '';
-                                            document.getElementById('uploadLabel').style.display = 'block';
-                                            document.getElementById('uploadProgress').style.display = 'none';
-                                            document.getElementById('progressPercent').textContent = '0';
-                                            document.getElementById('progressText').textContent = '0';
-                                            document.querySelector('#uploadProgress .progress-bar').style.width = '0%';
-                                        }
-
-                                        document.getElementById('uploadLabel').style.display = 'none';
-                                        document.getElementById('uploadProgress').style.display = 'block';
-
-                                        xhr.open('POST', '{{ route_with_year("download_tax_documents_store") }}');
-                                        xhr.send(formData);
-                                    });
-                                });
-                            </script>
                         </div>
 
 
@@ -238,3 +174,130 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadFileInput = document.getElementById('uploadFile');
+        
+        if (!uploadFileInput) {
+            console.error('Upload file input not found');
+            return;
+        }
+
+        uploadFileInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('uploadLabel').style.display = 'none';
+            document.getElementById('uploadProgress').style.display = 'block';
+
+            try {
+                const uploadId = generateUploadId();
+                const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+                
+                // Upload file in chunks
+                for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                    const start = chunkIndex * CHUNK_SIZE;
+                    const end = Math.min(start + CHUNK_SIZE, file.size);
+                    const chunk = file.slice(start, end);
+
+                    await uploadChunk(chunk, chunkIndex, totalChunks, uploadId, file.name);
+                    
+                    const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
+                    document.getElementById('progressPercent').textContent = progress;
+                    document.getElementById('progressText').textContent = progress;
+                    document.querySelector('#uploadProgress .progress-bar').style.width = progress + '%';
+                }
+
+                // Finalize upload
+                await finalizeUpload(uploadId, file.name);
+                
+                setTimeout(() => window.location.reload(), 1000);
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Upload failed: ' + error.message);
+                resetUpload();
+            }
+        });
+
+        function uploadChunk(chunk, chunkIndex, totalChunks, uploadId, fileName) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('chunk', chunk);
+                formData.append('chunkIndex', chunkIndex);
+                formData.append('totalChunks', totalChunks);
+                formData.append('uploadId', uploadId);
+                formData.append('fileName', fileName);
+                
+                const tokenInput = document.querySelector('input[name="_token"]');
+                if (tokenInput) {
+                    formData.append('_token', tokenInput.value);
+                }
+
+                const xhr = new XMLHttpRequest();
+                
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        resolve(xhr.response);
+                    } else {
+                        reject(new Error('Chunk upload failed: ' + xhr.status));
+                    }
+                });
+
+                xhr.addEventListener('error', function() {
+                    reject(new Error('Chunk upload error'));
+                });
+
+                xhr.open('POST', '{{ route_with_year("download_tax_documents_chunk") }}');
+                xhr.send(formData);
+            });
+        }
+
+        function finalizeUpload(uploadId, fileName) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('uploadId', uploadId);
+                formData.append('fileName', fileName);
+                
+                const tokenInput = document.querySelector('input[name="_token"]');
+                if (tokenInput) {
+                    formData.append('_token', tokenInput.value);
+                }
+
+                const xhr = new XMLHttpRequest();
+                
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        resolve(xhr.response);
+                    } else {
+                        reject(new Error('Finalize failed: ' + xhr.status));
+                    }
+                });
+
+                xhr.addEventListener('error', function() {
+                    reject(new Error('Finalize error'));
+                });
+
+                xhr.open('POST', '{{ route_with_year("download_tax_documents_finalize") }}');
+                xhr.send(formData);
+            });
+        }
+
+        function generateUploadId() {
+            return 'upload_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function resetUpload() {
+            document.getElementById('uploadFile').value = '';
+            document.getElementById('uploadLabel').style.display = 'block';
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('progressPercent').textContent = '0';
+            document.getElementById('progressText').textContent = '0';
+            document.querySelector('#uploadProgress .progress-bar').style.width = '0%';
+        }
+    });
+</script>
+@endpush

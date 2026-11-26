@@ -258,8 +258,7 @@
                         </div>
 
 
-                        <div class="col-lg-12 mb-4">
-                            <!-- reCAPTCHA -->
+                        <!--  <div class="col-lg-12 mb-4">
                             <div class="col-lg-12 mb-4">
                                 <div class="g-recaptcha" :data-sitekey="google_site_key"></div>
 
@@ -267,7 +266,7 @@
                                         errors.first('g-recaptcha')
                                     }}</span>
                             </div>
-                        </div>
+                        </div>-->
                         <!-- Submit Button -->
                         <div class="form-group col-lg-12 mx-auto mb-0">
                             <button role="button" class="btn btn-primary btn-block py-3" :disabled="isLoading"

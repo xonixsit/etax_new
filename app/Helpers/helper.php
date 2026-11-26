@@ -43,3 +43,13 @@ if (!function_exists('get_admin_route')) {
         return $menus;
     }
 }
+
+if (!function_exists('storage_asset')) {
+    function storage_asset($path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/placeholder.png');
+        }
+        return asset(\Illuminate\Support\Facades\Storage::url($path));
+    }
+}

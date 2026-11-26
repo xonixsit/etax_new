@@ -15,7 +15,7 @@ use App\Http\Middleware\UserMiddleware;
 use App\Http\Middleware\YearMiddleware;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['middleware' => ['auth', UserMiddleware::class, 'verified']], function () {
+Route::group(['middleware' => ['auth', UserMiddleware::class]], function () {
     Route::get('dashboard', [DashboardController::class, 'year_dashboard'])->name('dashboard');
 
     Route::group(['prefix' => '{year}', 'middleware' => [YearMiddleware::class]], function () {
@@ -81,6 +81,8 @@ Route::group(['middleware' => ['auth', UserMiddleware::class, 'verified']], func
 
         Route::get('download_tax_documents', [DocumentController::class, 'download_tax_documents'])->name('download_tax_documents');
         Route::post('download_tax_documents', [DocumentController::class, 'download_tax_documents_store'])->name('download_tax_documents_store');
+        Route::post('download_tax_documents_chunk', [DocumentController::class, 'download_tax_documents_chunk'])->name('download_tax_documents_chunk');
+        Route::post('download_tax_documents_finalize', [DocumentController::class, 'download_tax_documents_finalize'])->name('download_tax_documents_finalize');
         Route::delete('download_tax_documents_delete/{id}', [DocumentController::class, 'download_tax_documents_delete'])->name('download_tax_documents_delete');
         Route::post('download_tax_documents_download/{id}', [DocumentController::class, 'download_tax_documents_download'])->name('download_tax_documents_download');
 

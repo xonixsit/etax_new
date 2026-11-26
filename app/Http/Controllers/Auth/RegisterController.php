@@ -40,6 +40,19 @@ class RegisterController extends Controller
     protected $redirectTo = RouteServiceProvider::HOME;
 
     /**
+     * Get the post-registration redirect path.
+     *
+     * @return string
+     */
+    public function redirectTo()
+    {
+        if (auth()->user()->role == 'user') {
+            return route('dashboard');
+        }
+        return route('admin.dashboard');
+    }
+
+    /**
      * Create a new controller instance.
      *
      * @return void
@@ -85,6 +98,7 @@ class RegisterController extends Controller
             'name' => $data['fname'] . ' ' . $data['lname'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'email_verified_at' => now(),
         ]);
 
         Address::create([
@@ -118,7 +132,7 @@ class RegisterController extends Controller
         }
 
         return $request->wantsJson()
-            ? new JsonResponse(['redirect' => route('verification.notice')], 200)
+            ? new JsonResponse(['redirect' => $this->redirectTo()], 201)
             : redirect($this->redirectPath());
     }
 }

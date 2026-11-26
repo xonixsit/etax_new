@@ -55,15 +55,11 @@
                         <p><span>Phone :</span>+1-703-829-4357 </p>
                     </div>
                     <div class="footer-social-info">
-                        <p><span>Email :</span>Support@etaxplanner.com.com</p>
+                        <p><span>Email :</span>Support@etaxplanners.com</p>
                     </div>
-
                 </div>
             </div>
-
-
         </div>
-
 
         <div class="row footer-bottom mt-70 pt-3 pb-1">
             <div class="col-lg-6 col-md-6">

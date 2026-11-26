@@ -43,7 +43,7 @@
                         <li><a href="{{route('contact')}}">Contact Us</a></li>
                         <li><a href="{{route('faq')}}">FAQ</a></li>
                         <li><a href="{{route('page', 'tips')}}">Tips</a></li>
-                        <li><a href="{{route('referrals.create')}}">Referral</a></li>
+                        <li><a href="/referrals/create">Referral</a></li>
                     </ul>
                     <div class="donate-btn-header">
                         @auth('web')
@@ -163,7 +163,7 @@
                 <li><a href="{{route('contact')}}">Contact Us</a></li>
                 <li><a href="{{route('faq')}}">FAQ</a></li>
                 <li><a href="{{route('page','tips')}}">Tips</a></li>
-                <li><a href="{{route('referrals.create')}}">Referral</a></li>
+                <li><a href="/referrals/create">Referral</a></li>
 
 
                 @auth('web')

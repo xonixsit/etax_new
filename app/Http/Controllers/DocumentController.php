@@ -287,21 +287,100 @@ class DocumentController extends Controller
 
     }
 
-    public function download_tax_documents_delete($year, $id)
+    public function download_tax_documents_chunk(Request $request): JsonResponse
     {
-        $downloadSave = DownloadSave::find($id);
+        $request->validate([
+            'chunk' => 'required|file',
+            'chunkIndex' => 'required|integer',
+            'totalChunks' => 'required|integer',
+            'uploadId' => 'required|string',
+            'fileName' => 'required|string',
+        ]);
 
-        abort_unless($downloadSave, 404);
+        $uploadId = $request->uploadId;
+        $chunkIndex = $request->chunkIndex;
+        $totalChunks = $request->totalChunks;
+        $fileName = $request->fileName;
 
-        if ($downloadSave->added_by == auth()->user()->id) {
-            Storage::delete($downloadSave->path);
-            $downloadSave->delete();
-
-            return redirect()->back()->with('success', 'File deleted successfully');
-        } else {
-            return redirect()->back()->with('error', 'You are not authorized to delete this file');
+        // Create temp directory for chunks
+        $tempDir = storage_path('app/temp_uploads/' . $uploadId);
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
         }
+
+        // Save chunk
+        $chunk = $request->file('chunk');
+        $chunk->move($tempDir, 'chunk_' . $chunkIndex);
+
+        return response()->json([
+            'message' => 'Chunk uploaded successfully',
+            'chunkIndex' => $chunkIndex,
+            'totalChunks' => $totalChunks
+        ]);
     }
+
+    public function download_tax_documents_finalize(Request $request): JsonResponse
+    {
+        $request->validate([
+            'uploadId' => 'required|string',
+            'fileName' => 'required|string'
+        ]);
+
+        $uploadId = $request->uploadId;
+        $originalFileName = $request->fileName;
+        $tempDir = storage_path('app/temp_uploads/' . $uploadId);
+
+        if (!is_dir($tempDir)) {
+            return response()->json(['error' => 'Upload session not found'], 404);
+        }
+
+        // Get all chunks and merge them
+        $chunks = glob($tempDir . '/chunk_*');
+        sort($chunks);
+
+        if (empty($chunks)) {
+            return response()->json(['error' => 'No chunks found'], 400);
+        }
+
+        // Extract extension from original filename
+        $file_ext = pathinfo($originalFileName, PATHINFO_EXTENSION);
+        $file_name_only = pathinfo($originalFileName, PATHINFO_FILENAME);
+        $file_new_name = $file_name_only . '_' . time() . '.' . $file_ext;
+        $finalPath = storage_path('app/public/tax_documents/' . $file_new_name);
+
+        // Ensure directory exists
+        if (!is_dir(dirname($finalPath))) {
+            mkdir(dirname($finalPath), 0755, true);
+        }
+
+        // Merge chunks
+        $finalFile = fopen($finalPath, 'wb');
+        foreach ($chunks as $chunk) {
+            $chunkData = fopen($chunk, 'rb');
+            stream_copy_to_stream($chunkData, $finalFile);
+            fclose($chunkData);
+            unlink($chunk);
+        }
+        fclose($finalFile);
+
+        // Clean up temp directory
+        rmdir($tempDir);
+
+        // Save to database
+        $downloadSave = DownloadSave::create([
+            'user_id' => auth()->user()->id,
+            'added_by' => auth()->user()->id,
+            'filename' => $originalFileName,
+            'path' => 'public/tax_documents/' . $file_new_name
+        ]);
+
+        return response()->json([
+            'message' => 'Document uploaded successfully',
+            'id' => $downloadSave->id,
+            'name' => $downloadSave->filename,
+        ]);
+    }
+
 
     public function download_tax_documents_download($year, $id)
     {

@@ -17,7 +17,12 @@ if (!function_exists('route_with_year')) {
 if (!function_exists('storage_asset')) {
     function storage_asset($path): string
     {
-        return asset(Storage::url($path));
+        if (empty($path)) {
+            return asset('assets/images/placeholder.png');
+        }
+        // Strip leading "public/" prefix that Laravel adds when storing with store("public/...")
+        $path = ltrim(preg_replace('#^public/#', '', $path), '/');
+        return asset('public/storage/' . $path);
     }
 }
 

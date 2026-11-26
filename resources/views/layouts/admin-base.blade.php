@@ -194,11 +194,11 @@
                 $(".sidebar-scroll").scrollTo("+=" + Math.abs(diff), 500);
         });
 
-        for (const sel in $('select')) {
-            if ($('select')[sel].dataset.old || false) {
-                $('select')[sel].value = $('select')[sel].dataset.old;
+        $('select').each(function() {
+            if (this.dataset && this.dataset.old) {
+                this.value = this.dataset.old;
             }
-        }
+        });
     });
 </script>
 

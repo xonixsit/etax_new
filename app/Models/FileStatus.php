@@ -18,7 +18,7 @@ class FileStatus extends Model
         });
     }
 
-    public function statusList(): array
+    public static function statusList(): array
     {
         return [
             1 => 'Information Pending',

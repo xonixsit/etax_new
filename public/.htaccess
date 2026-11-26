@@ -5,8 +5,8 @@
 
     RewriteEngine On
 	
-	RewriteCond %{HTTP_HOST} ^etaxplanner.com [NC]
-    RewriteRule ^(.*)$ https://www.etaxplanner.com/$1 [L,R=301,NC]
+	RewriteCond %{HTTP_HOST} ^etaxplanners.com [NC]
+    RewriteRule ^(.*)$ https://www.etaxplanners.com/$1 [L,R=301,NC]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
